@@ -1,4 +1,142 @@
+
 # rails-translate-routes
+
+**This is the fork of**:
+[https://github.com/pebiantara/rails-translate-routes](https://github.com/pebiantara/rails-translate-routes)
+which is also fork with added support for rails 4, forked from:
+[https://github.com/francesc/rails-translate-routes](https://github.com/francesc/rails-translate-routes)
+
+## Added functionality description:
+
+**For complete information see original readme below. These are only basics and quickshows**
+
+Our routes.rb file:
+```ruby
+Kw::Application.routes.draw do
+  root to: 'homes', action: "index"
+  resources :pages
+end
+```
+will generate routes: 
+```
+  root_path         GET       /                                       homes#index
+  pages_path        GET       /pages(.:format)                        pages#index
+                    POST      /pages(.:format)                        pages#create
+  new_page_path     GET       /pages/new(.:format)                    pages#new
+  edit_page_path    GET       /pages/:id/edit(.:format)               pages#edit
+  page_path         GET       /pages/:id(.:format)                    pages#show
+                    PATCH     /pages/:id(.:format)                    pages#update
+                    PUT       /pages/:id(.:format)                    pages#update
+                    DELETE    /pages/:id(.:format)                    pages#destroy
+```
+appending this basic setting to end of routes.rb:
+```ruby
+ActionDispatch::Routing::Translator.translate_from_file(I18n.available_locales.map { |locale| "config/locales/routes.yml" })
+```
+will result in routes look like this:
+```
+root_sk_path            GET     /                                   homes#index {:locale=>"sk"}
+root_en_path            GET     /en                                 homes#index {:locale=>"en"}
+pages_sk_path           GET     /tvorba(.:format)                   pages#index {:locale=>"sk"}
+pages_en_path           GET     /en/portfolio(.:format)             pages#index {:locale=>"en"}
+                        POST    /tvorba(.:format)                   pages#create {:locale=>"sk"}
+                        POST    /en/portfolio(.:format)             pages#create {:locale=>"en"}
+new_page_sk_path        GET     /tvorba/new(.:format)               pages#new {:locale=>"sk"}
+new_page_en_path        GET     /en/portfolio/new(.:format)         pages#new {:locale=>"en"}
+edit_page_sk_path       GET     /tvorba/:id/edit(.:format)          pages#edit {:locale=>"sk"}
+edit_page_en_path       GET     /en/portfolio/:id/edit(.:format)    pages#edit {:locale=>"en"}
+page_sk_path            GET     /tvorba/:id(.:format)               pages#show {:locale=>"sk"}
+page_en_path            GET     /en/portfolio/:id(.:format)         pages#show {:locale=>"en"}
+                        PATCH   /tvorba/:id(.:format)               pages#update {:locale=>"sk"}
+                        PATCH   /en/portfolio/:id(.:format)         pages#update {:locale=>"en"}
+                        PUT     /tvorba/:id(.:format)               pages#update {:locale=>"sk"}
+                        PUT     /en/portfolio/:id(.:format)         pages#update {:locale=>"en"}
+                        DELETE  /tvorba/:id(.:format)               pages#destroy {:locale=>"sk"}
+                        DELETE  /en/portfolio/:id(.:format)         pages#destroy {:locale=>"en"}
+```
+adding extra option to keep untranslated routes (routes.rb):
+```
+ActionDispatch::Routing::Translator.translate_from_file(I18n.available_locales.map { |locale| "config/locales/routes.yml" }, { keep_untranslated_routes: true })
+
+```
+results in original URLs from case 1 added, but without untranslated helpers. (You normally don't need them/or edit your application code, all is done automatically, but in some cases when I was using polymorphic paths I get nomethod error, see original readme below)
+```
+root_sk_path          GET     /                                     homes#index {:locale=>"sk"}
+root_en_path          GET     /en                                   homes#index {:locale=>"en"}
+                      GET     /                                     homes#index
+pages_sk_path         GET     /tvorba(.:format)                     pages#index {:locale=>"sk"}
+pages_en_path         GET     /en/portfolio(.:format)               pages#index {:locale=>"en"}
+                      GET     /pages(.:format)                      pages#index
+                      POST    /tvorba(.:format)                     pages#create {:locale=>"sk"}
+                      POST    /en/portfolio(.:format)               pages#create {:locale=>"en"}
+                      POST    /pages(.:format)                      pages#create
+new_page_sk_path      GET     /tvorba/new(.:format)                 pages#new {:locale=>"sk"}
+new_page_en_path      GET     /en/portfolio/new(.:format)           pages#new {:locale=>"en"}
+                      GET     /pages/new(.:format)                  pages#new
+edit_page_sk_path     GET     /tvorba/:id/edit(.:format)            pages#edit {:locale=>"sk"}
+edit_page_en_path     GET     /en/portfolio/:id/edit(.:format)      pages#edit {:locale=>"en"}
+                      GET     /pages/:id/edit(.:format)             pages#edit
+page_sk_path          GET     /tvorba/:id(.:format)                 pages#show {:locale=>"sk"}
+page_en_path          GET     /en/portfolio/:id(.:format)           pages#show {:locale=>"en"}
+                      GET     /pages/:id(.:format)                  pages#show
+                      PATCH   /tvorba/:id(.:format)                 pages#update {:locale=>"sk"}
+                      PATCH   /en/portfolio/:id(.:format)           pages#update {:locale=>"en"}
+                      PATCH   /pages/:id(.:format)                  pages#update
+                      PUT     /tvorba/:id(.:format)                 pages#update {:locale=>"sk"}
+                      PUT     /en/portfolio/:id(.:format)           pages#update {:locale=>"en"}
+                      PUT     /pages/:id(.:format)                  pages#update
+                      DELETE  /tvorba/:id(.:format)                 pages#destroy {:locale=>"sk"}
+                      DELETE  /en/portfolio/:id(.:format)           pages#destroy {:locale=>"en"}
+                      DELETE  /pages/:id(.:format)                  pages#destroy
+```
+
+Here comes one extra option added by me on the scene:
+
+routes.rb:
+```
+ActionDispatch::Routing::Translator.translate_from_file(I18n.available_locales.map { |locale| "config/locales/routes.yml" }, { keep_untranslated_routes_with_helpers: true })
+```
+result:
+```
+root_sk_path          GET     /                                     homes#index {:locale=>"sk"}
+root_en_path          GET     /en                                   homes#index {:locale=>"en"}
+root_path             GET     /                                     homes#index
+pages_sk_path         GET     /tvorba(.:format)                     pages#index {:locale=>"sk"}
+pages_en_path         GET     /en/portfolio(.:format)               pages#index {:locale=>"en"}
+pages_path            GET     /pages(.:format)                      pages#index
+                      POST    /tvorba(.:format)                     pages#create {:locale=>"sk"}
+                      POST    /en/portfolio(.:format)               pages#create {:locale=>"en"}
+                      POST    /pages(.:format)                      pages#create
+new_page_sk_path      GET     /tvorba/new(.:format)                 pages#new {:locale=>"sk"}
+new_page_en_path      GET     /en/portfolio/new(.:format)           pages#new {:locale=>"en"}
+new_page_path         GET     /pages/new(.:format)                  pages#new
+edit_page_sk_path     GET     /tvorba/:id/edit(.:format)            pages#edit {:locale=>"sk"}
+edit_page_en_path     GET     /en/portfolio/:id/edit(.:format)      pages#edit {:locale=>"en"}
+edit_page_path        GET     /pages/:id/edit(.:format)             pages#edit
+page_sk_path          GET     /tvorba/:id(.:format)                 pages#show {:locale=>"sk"}
+page_en_path          GET     /en/portfolio/:id(.:format)           pages#show {:locale=>"en"}
+page_path             GET     /pages/:id(.:format)                  pages#show
+                      PATCH   /tvorba/:id(.:format)                 pages#update {:locale=>"sk"}
+                      PATCH   /en/portfolio/:id(.:format)           pages#update {:locale=>"en"}
+                      PATCH   /pages/:id(.:format)                  pages#update
+                      PUT     /tvorba/:id(.:format)                 pages#update {:locale=>"sk"}
+                      PUT     /en/portfolio/:id(.:format)           pages#update {:locale=>"en"}
+                      PUT     /pages/:id(.:format)                  pages#update
+                      DELETE  /tvorba/:id(.:format)                 pages#destroy {:locale=>"sk"}
+                      DELETE  /en/portfolio/:id(.:format)           pages#destroy {:locale=>"en"}
+                      DELETE  /pages/:id(.:format)                  pages#destroy
+```
+
+## Installation
+
+add to your gemfile:
+```
+gem 'rails-translate-routes', github: 'K0V0/rails-translate-routes'
+```
+save & run:
+```
+bundle install
+```
 
 **Important change from version 0.0.5 (Feb 2012) to 0.1.0 (June 2012)**: if you're updating from an earlier version take into account that now translations defined in routes.yml are namespaced to avoid conflicts with other translations from app (thanks to cawel for the patch). To upgrade you just have to add the namespace `routes` to your `routes.yml (see example in the below docs).
 
