@@ -2,9 +2,13 @@
 # rails-translate-routes
 
 **This is the fork of**:
+
 [https://github.com/pebiantara/rails-translate-routes](https://github.com/pebiantara/rails-translate-routes)
+
 which is also fork with added support for rails 4, forked from:
+
 [https://github.com/francesc/rails-translate-routes](https://github.com/francesc/rails-translate-routes)
+
 
 ## Added functionality description:
 
@@ -55,9 +59,8 @@ page_en_path            GET     /en/portfolio/:id(.:format)         pages#show {
                         DELETE  /en/portfolio/:id(.:format)         pages#destroy {:locale=>"en"}
 ```
 adding extra option to keep untranslated routes (routes.rb):
-```
+```ruby
 ActionDispatch::Routing::Translator.translate_from_file(I18n.available_locales.map { |locale| "config/locales/routes.yml" }, { keep_untranslated_routes: true })
-
 ```
 results in original URLs from case 1 added, but without untranslated helpers. (You normally don't need them/or edit your application code, all is done automatically, but in some cases when I was using polymorphic paths I get nomethod error, see original readme below)
 ```
@@ -93,7 +96,7 @@ page_en_path          GET     /en/portfolio/:id(.:format)           pages#show {
 Here comes one extra option added by me on the scene:
 
 routes.rb:
-```
+```ruby
 ActionDispatch::Routing::Translator.translate_from_file(I18n.available_locales.map { |locale| "config/locales/routes.yml" }, { keep_untranslated_routes_with_helpers: true })
 ```
 result:
@@ -130,13 +133,17 @@ page_path             GET     /pages/:id(.:format)                  pages#show
 ## Installation
 
 add to your gemfile:
-```
+```ruby
 gem 'rails-translate-routes', github: 'K0V0/rails-translate-routes'
 ```
 save & run:
-```
+```ruby
 bundle install
 ```
+
+
+# ----- Original readme: -----
+
 
 **Important change from version 0.0.5 (Feb 2012) to 0.1.0 (June 2012)**: if you're updating from an earlier version take into account that now translations defined in routes.yml are namespaced to avoid conflicts with other translations from app (thanks to cawel for the patch). To upgrade you just have to add the namespace `routes` to your `routes.yml (see example in the below docs).
 
